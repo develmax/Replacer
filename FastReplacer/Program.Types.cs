@@ -11,17 +11,7 @@ namespace FastReplacer
             {"new_text", "new_info"}
         };*/
 
-        private class TreeNode
-        {
-            public string text;
-            public string repl;
-            public TreeNode child;
-            public TreeNode nextSibling;
-            public TreeNode parent;
-            public int len;
-            public int max_len;
-            //public int min_len;
-        }
+        
 
         private static TreeNode tree = new TreeNode
         {
