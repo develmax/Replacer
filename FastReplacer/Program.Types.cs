@@ -19,29 +19,22 @@ namespace FastReplacer
             public TreeNode nextSibling;
             public TreeNode parent;
             public int len;
-            public int max_len;
-            //public int min_len;
         }
 
         private static TreeNode tree = new TreeNode
         {
             text = "new_",
             len = 4,
-            max_len = 8,
-            //max_len = 7,
-            //min_len = 7,
             child = new TreeNode
             {
                 text = "name",
                 repl = "new_caption",
                 len = 8,
-                //max_len = 8,
                 nextSibling = new TreeNode
                 {
                     text = "text",
                     repl = "new_info",
-                    len = 8//,
-                    //max_len = 8
+                    len = 8
     }
             }
         };

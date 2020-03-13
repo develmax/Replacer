@@ -57,7 +57,7 @@ namespace FastReplacer
 
         private static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree)
         {
-            var partLen = tree.max_len; //100;
+            var partLen = 8; //tree.max_len;
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
             var partsLen = part2Len + part2Len;
