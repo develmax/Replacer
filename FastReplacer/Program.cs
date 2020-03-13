@@ -57,7 +57,7 @@ namespace FastReplacer
 
         private static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree)
         {
-            var partLen = 100;
+            var partLen = tree.max_len; //100;
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
             var partsLen = part2Len + part2Len;
@@ -388,13 +388,13 @@ namespace FastReplacer
                 }
                 case states.end:
                 {
-                    if (writeLastIndex > index)
+                    if (writeLastIndex > lastIndex)
                     {
                         d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
                         d.Write(buf.Slice(0, lastIndex + 1));
                     }
-                    else if (writeLastIndex < index)
-                        d.Write(buf.Slice(writeLastIndex + 1, writeLastIndex - lastIndex));
+                    else if (writeLastIndex < lastIndex)
+                        d.Write(buf.Slice(writeLastIndex + 1, lastIndex - writeLastIndex));
 
                     break;
                 }
