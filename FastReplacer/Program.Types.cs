@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ReplaceLogic;
 
 namespace FastReplacer
 {
@@ -11,7 +10,7 @@ namespace FastReplacer
             {"new_text", "new_info"}
         };*/
 
-        
+
 
         private static TreeNode tree = new TreeNode
         {
@@ -27,7 +26,7 @@ namespace FastReplacer
                     text = "text",
                     repl = "new_info",
                     len = 8
-    }
+                }
             }
         };
 

@@ -1,38 +1,24 @@
 ﻿using System;
 using System.IO;
 
-namespace ReplaceLogic
+namespace ReplaceLogic.V1
 {
-    public class ReplaceLogic
+    public static class ReplaceLogic
     {
-        private static void ReplaceFile(string file, )
+        public static void ReplaceFile(string file, TreeNode tree, int max_len)
         {
             using (var s = new StreamReader(file))
             using (var d = new StreamWriter(file + ".repl"))
             {
-                ReplaceFile(s, d, tree);
+                ReplaceFile(s, d, tree, max_len);
                 /*d.Flush();
                 d.Close();*/
             }
         }
 
-        private enum states : sbyte
+        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int max_len)
         {
-            start = -1,
-            read_first = 10,
-            check_block = 20,
-            move_index = 30,
-            fast_check_node = 40,
-            check_node = 45,
-            next_node = 50,
-            check_char = 70,
-            write_node = 80,
-            end = 100
-        }
-
-        private static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree)
-        {
-            var partLen = tree.max_len; //100;
+            var partLen = max_len;
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
             var partsLen = part2Len + part2Len;
@@ -61,7 +47,7 @@ namespace ReplaceLogic
             var writeLastIndex = -1;
 
             var lastRead = false;
-            var lastIndex = 0;
+            var lastIndex = -1;
 
             var continueCheck = false;
 
@@ -88,7 +74,7 @@ namespace ReplaceLogic
                         if (readLen < part2Len)
                         {
                             lastRead = true;
-                            lastIndex = part2LastIndex + readLen;
+                            lastIndex = readLen-1;
                         }
 
                         //readCount += readLen;
@@ -149,7 +135,12 @@ namespace ReplaceLogic
 
                         if (lastRead)
                         {
-                            if (lostLen < node.text.Length)
+                            if (lostLen == node.text.Length)
+                            {
+                                if (buf[index + nodeTextLastIndex] != node.text[nodeTextLastIndex])
+                                    goto case states.next_node;
+                            }
+                            else if (lostLen < node.text.Length)
                             {
                                 if (nodeTextLastIndex - lostLen > lastIndex)
                                     goto case states.next_node;
@@ -225,17 +216,20 @@ namespace ReplaceLogic
 
                             if (startLen == 0)
                             {
-                                d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
+                                if(partsLastIndex - writeLastIndex > 0)
+                                    d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
                             }
                             else if (startLen > 0)
                             {
-                                d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
+                                if (partsLastIndex - writeLastIndex > 0)
+                                    d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
+
                                 d.Write(buf.Slice(0, startLen));
                             }
-                            else
+                            else if(partsLastIndex - writeLastIndex + startLen > 0)
                                 d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex + startLen));
                         }
-                        else
+                        else if(index - writeLastIndex - tmpLen > 0)
                             d.Write(buf.Slice(writeLastIndex + 1, index - writeLastIndex - tmpLen));
 
                         writeLastIndex = index;

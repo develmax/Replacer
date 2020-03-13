@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ReplaceLogic\ReplaceLogic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="customizations.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
