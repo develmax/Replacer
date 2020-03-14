@@ -218,5 +218,42 @@ namespace ReplaceLogic.Tests
 
             Assert.AreEqual(new string('a', str.Length/2), result);
         }
+
+        [TestMethod]
+        public void ReplaceOneSymbol_ReplaceAxB1()
+        {
+            var str = "abacadfabc";
+
+            var tree = new TreeNode
+            {
+                text = "a",
+                repl = "b",
+                len = 1,
+                child = new TreeNode
+                {
+                    text = "b",
+                    repl = "a",
+                    len = 2,
+                    nextSibling = new TreeNode
+                    {
+                        text = "c",
+                        repl = "a",
+                        len = 2
+                    }
+                }
+            };
+
+            tree.child.parent = tree;
+            tree.child.nextSibling.parent = tree;
+
+            var max_len = 2;
+
+            var result = PrepareStreams(str, (data, target) =>
+            {
+                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
+            });
+
+            Assert.AreEqual("aabdfac", result);
+        }
     }
 }

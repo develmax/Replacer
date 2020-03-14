@@ -1,23 +1,49 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
-namespace ReplaceLogic.V1
+namespace ReplaceLogic.V2
 {
     public static class ReplaceLogic
     {
-        public static void ReplaceFile(string file, TreeNode tree, int max_len)
+        public static void ReplaceFile(string file, FastTreeNode[] t, string[] ts, int max_len)
         {
             using (var s = new StreamReader(file))
             using (var d = new StreamWriter(file + ".repl"))
             {
-                ReplaceFile(s, d, tree, max_len);
+                ReplaceFile(s, d, t, ts, max_len);
                 /*d.Flush();
                 d.Close();*/
             }
         }
 
-        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int max_len)
+        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, FastTreeNode[] t, string[] strs, int max_len)
         {
+            var n = 0;
+            var tsl = stackalloc int[strs.Length];
+            var tsi = stackalloc int[strs.Length];
+            for (int i = 0; i < strs.Length; i++)
+            {
+                tsl[i] = strs[i].Length;
+                tsi[i] = n;
+                n = n + tsl[i];
+            }
+            Span<char> ts = stackalloc char[n];
+            
+            for (int i = 0; i < strs.Length; i++)
+            {
+                strs[i].AsSpan().CopyTo(ts.Slice(tsi[i], tsl[i]));
+            }
+
+            var tree = stackalloc FastTreeNode[t.Length];
+            for (int i = 0; i < t.Length; i++)
+            {
+                tree[i] = t[i];
+            }
+
+            /*var sw = new Stopwatch();
+            sw.Start();*/
+
             var partLen = max_len;
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
@@ -58,7 +84,7 @@ namespace ReplaceLogic.V1
             var readLen = 0;
             //var processLen = 0;
 
-            TreeNode node = tree;
+            var node = 0;
 
             switch (state)
             {
@@ -123,30 +149,30 @@ namespace ReplaceLogic.V1
 
                                             }*/
 
-                        if (buf[index] != node.text[0])
+                        if (buf[index] != ts[tsi[tree[node].text]]/*[0]*/)
                             goto case states.next_node;
 
-                        if (node.text.Length == 1)
+                        if (tsl[tree[node].text]/*.Length*/ == 1)
                         {
                             goto case states.check_node;
                         }
 
-                        var nodeTextLastIndex = node.text.Length - 1;
+                        var nodeTextLastIndex = tsl[tree[node].text]/*.Length*/ - 1;
                         var lostLen = partsLen - index;
 
                         if (lastRead)
                         {
-                            if (lostLen == node.text.Length)
+                            if (lostLen == tsl[tree[node].text]/*.Length*/)
                             {
-                                if (buf[index + nodeTextLastIndex] != node.text[nodeTextLastIndex])
+                                if (buf[index + nodeTextLastIndex] != ts[tsi[tree[node].text]+nodeTextLastIndex])
                                     goto case states.next_node;
                             }
-                            else if (lostLen < node.text.Length)
+                            else if (lostLen < tsl[tree[node].text]/*.Length*/)
                             {
                                 if (nodeTextLastIndex - lostLen > lastIndex)
                                     goto case states.next_node;
 
-                                if (buf[nodeTextLastIndex - lostLen] != node.text[nodeTextLastIndex])
+                                if (buf[nodeTextLastIndex - lostLen] != ts[tsi[tree[node].text]+nodeTextLastIndex])
                                     goto case states.next_node;
                             }
                             else
@@ -154,19 +180,19 @@ namespace ReplaceLogic.V1
                                 if (index + nodeTextLastIndex > lastIndex)
                                     goto case states.next_node;
 
-                                if (buf[index + nodeTextLastIndex] != node.text[nodeTextLastIndex])
+                                if (buf[index + nodeTextLastIndex] != ts[tsi[tree[node].text]+nodeTextLastIndex])
                                     goto case states.next_node;
                             }
                         }
                         else
                         {
-                            if (lostLen < node.text.Length)
+                            if (lostLen < tsl[tree[node].text]/*.Length*/)
                             {
-                                if (buf[nodeTextLastIndex - lostLen] != node.text[nodeTextLastIndex])
+                                if (buf[nodeTextLastIndex - lostLen] != ts[tsi[tree[node].text]+nodeTextLastIndex])
                                     goto case states.next_node;
                             }
                             else
-                                if (buf[index + nodeTextLastIndex] != node.text[nodeTextLastIndex])
+                                if (buf[index + nodeTextLastIndex] != ts[tsi[tree[node].text]+nodeTextLastIndex])
                                 goto case states.next_node;
                         }
                         
@@ -190,12 +216,12 @@ namespace ReplaceLogic.V1
                     }
                 case states.check_node:
                     {
-                        if (node.child != null)
+                        if (tree[node].child != -1)
                         {
-                            node = node.child;
+                            node = tree[node].child;
                             goto case states.move_index;
                         }
-                        else if (node.repl != null)
+                        else if (ts[tree[node].repl] != null)
                         {
                             writeIndex = index;
                             goto case states.write_node;
@@ -207,7 +233,7 @@ namespace ReplaceLogic.V1
                     }
                 case states.write_node:
                     {
-                        var tmpLen = node.len;
+                        var tmpLen = tree[node].len;
                         /*var tmp = node;
 
                         while (tmp != null)
@@ -248,8 +274,8 @@ namespace ReplaceLogic.V1
 
                         writeLastIndex = writeIndex;
 
-                        d.Write(node.repl);
-                        node = tree;
+                        d.Write(ts[tree[node].repl]);
+                        node = 0;
 
                         if (continueCheck)
                         {
@@ -261,16 +287,16 @@ namespace ReplaceLogic.V1
                     }
                 case states.next_node:
                     {
-                        if (node.nextSibling != null)
+                        if (tree[node].nextSibling != -1)
                         {
-                            node = node.nextSibling;
+                            node = tree[node].nextSibling;
                             goto case states.fast_check_node;
                         }
-                        else if (node.parent != null)
+                        else if (tree[node].parent != -1)
                         {
-                            if (node.parent.repl != null)
+                            if (tree[tree[node].parent].repl != -1)
                             {
-                                node = node.parent;
+                                node = tree[node].parent;
 
                                 if (index == 0)
                                     writeIndex = partsLastIndex;
@@ -281,22 +307,22 @@ namespace ReplaceLogic.V1
                                 goto case states.write_node;
                             }
 
-                            index = index - node.parent.text.Length;
+                            index = index - tsl[tree[tree[node].parent].text]/*.Length*/;
                             if (index < 0)
                                 index = index + partsLen;
 
-                            node = node.parent;
+                            node = tree[node].parent;
                             goto case states.next_node;
                         }
                         else
                         {
-                            node = tree;
+                            node = 0;
                             goto case states.move_index;
                         }
                     }
                 case states.check_char:
                     {
-                        if (buf[index] != node.text[charCheckingIndex])
+                        if (buf[index] != ts[tsi[tree[node].text]+charCheckingIndex])
                         {
                             index = rollbackCharCheckingIndex;
                             charChecking = false;
@@ -389,6 +415,10 @@ namespace ReplaceLogic.V1
                         break;
                     }
             }
+
+            /*sw.Stop();
+
+            Console.WriteLine($"{sw.ElapsedMilliseconds}ms");*/
         }
     }
 }

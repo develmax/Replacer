@@ -1,4 +1,4 @@
-﻿namespace ReplaceLogic.V1
+﻿namespace ReplaceLogic.V4
 {
     public enum states : sbyte
     {
@@ -11,6 +11,7 @@
         next_node = 50,
         check_char = 70,
         write_node = 80,
-        end = 100
+        end = 100,
+        exit = 110
     }
 }
