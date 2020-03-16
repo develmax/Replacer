@@ -1,6 +1,4 @@
 ﻿using ReplaceLogic;
-using ReplaceLogic.V1;
-using ReplaceLogic.V2;
 
 namespace FastReplacer
 {
@@ -12,16 +10,16 @@ namespace FastReplacer
             {"new_text", "new_info"}
         };*/
 
-        private static TreeNode treeV1 = new TreeNode
+        private static ReplaceLogic.V1.TreeNode treeV1 = new ReplaceLogic.V1.TreeNode
         {
             text = "new_",
             len = 4,
-            child = new TreeNode
+            child = new ReplaceLogic.V1.TreeNode
             {
                 text = "name",
                 repl = "new_caption",
                 len = 8,
-                nextSibling = new TreeNode
+                nextSibling = new ReplaceLogic.V1.TreeNode
                 {
                     text = "text",
                     repl = "new_info",
@@ -45,9 +43,9 @@ namespace FastReplacer
             "new_info"
         };
 
-        private static FastTreeNode[] treeV2 = 
+        private static ReplaceLogic.V2.FastTreeNode[] treeV2 = 
         {
-            new FastTreeNode
+            new ReplaceLogic.V2.FastTreeNode
             {
                 text = 0,
                 repl = -1,
@@ -56,7 +54,7 @@ namespace FastReplacer
                 parent = -1,
                 nextSibling = -1
             },
-            new FastTreeNode
+            new ReplaceLogic.V2.FastTreeNode
             {
                 text = 1,
                 repl = 2,
@@ -65,7 +63,7 @@ namespace FastReplacer
                 nextSibling = 2,
                 parent = 0
             },
-            new FastTreeNode
+            new ReplaceLogic.V2.FastTreeNode
             {
                 text = 3,
                 repl = 4,
@@ -153,6 +151,75 @@ namespace FastReplacer
             treeV5.child.nextSibling.parent = treeV5;
         }
 
+        private static ReplaceLogic.V6.TreeNode treeV6 = new ReplaceLogic.V6.TreeNode
+        {
+            text = "new_",
+            len = 4,
+            child = new ReplaceLogic.V6.TreeNode
+            {
+                text = "name",
+                repl = "new_caption",
+                len = 8,
+                nextSibling = new ReplaceLogic.V6.TreeNode
+                {
+                    text = "text",
+                    repl = "new_info",
+                    len = 8
+                }
+            }
+        };
+
+        static void ReplaceLogicV6()
+        {
+            treeV6.child.parent = treeV6;
+            treeV6.child.nextSibling.parent = treeV6;
+        }
+
+        private static string[] treeV7Str =
+        {
+            "new_",
+            "name",
+            "new_caption",
+            "text",
+            "new_info"
+        };
+
+        private static ReplaceLogic.V7.FastTreeNode[] treeV7 =
+        {
+            new ReplaceLogic.V7.FastTreeNode
+            {
+                text = 0,
+                repl = -1,
+                len = 4,
+                child = 1,
+                parent = -1,
+                nextSibling = -1
+            },
+            new ReplaceLogic.V7.FastTreeNode
+            {
+                text = 1,
+                repl = 2,
+                len = 8,
+                child = -1,
+                nextSibling = 2,
+                parent = 0
+            },
+            new ReplaceLogic.V7.FastTreeNode
+            {
+                text = 3,
+                repl = 4,
+                len = 8,
+                child = -1,
+                parent = 0,
+                nextSibling = -1
+            }
+        };
+
+        static void ReplaceLogicV7()
+        {
+
+        }
+
         static Program()
         {
             ReplaceLogicV1();
@@ -160,6 +227,8 @@ namespace FastReplacer
             ReplaceLogicV3();
             ReplaceLogicV4();
             ReplaceLogicV5();
+            ReplaceLogicV6();
+            ReplaceLogicV7();
         }
     }
 }

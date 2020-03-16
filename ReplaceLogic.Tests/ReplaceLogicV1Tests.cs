@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ReplaceLogic.V1;
 
 namespace ReplaceLogic.Tests
 {

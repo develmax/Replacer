@@ -1,14 +1,14 @@
 ﻿using System;
 using System.IO;
 
-namespace ReplaceLogic.V1
+namespace ReplaceLogic.V6
 {
     public static class ReplaceLogic
     {
         public static void ReplaceFile(string file, TreeNode tree, int max_len)
         {
-            using (var s = new StreamReader(new BufferedStream(File.OpenRead(file), 1024 * 1024)))
-            using (var d = new StreamWriter(new BufferedStream(File.OpenWrite(file+".repl"), 1024 * 1024)))
+            using (var s = new StreamReader(file))
+            using (var d = new StreamWriter(file + ".repl"))
             {
                 ReplaceFile(s, d, tree, max_len);
                 /*d.Flush();
@@ -16,7 +16,7 @@ namespace ReplaceLogic.V1
             }
         }
 
-        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int max_len)
+        public static void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int max_len)
         {
             var partLen = max_len;
             var part2Len = partLen + partLen;
@@ -28,7 +28,7 @@ namespace ReplaceLogic.V1
             var part3LastIndex = part3Len - 1;
             var partsLastIndex = partsLen - 1;
 
-            Span<char> buf = stackalloc char[partsLen];
+            Span<char> buf = new char[partsLen];
 
             //var buf = new Span<char>(array);
 
