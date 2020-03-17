@@ -16,6 +16,8 @@ namespace ReplaceLogic.V1
 
             foreach (var item in dic.OrderByDescending(i => i.Key.Length))
             {
+                if (string.IsNullOrEmpty(item.Key)) continue;
+
                 if (items.TryGetValue(item.Key, out var foundNode))
                 {
                     foundNode.repl = item.Value;

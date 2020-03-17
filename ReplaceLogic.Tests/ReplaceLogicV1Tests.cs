@@ -422,12 +422,7 @@ namespace ReplaceLogic.Tests
 
             var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
 
-            var str = "A";
-
-            var result = PrepareStreams(str,
-                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, maxLen); });
-
-            Assert.AreEqual(string.Empty, result);
+            Assert.IsNull(tree);
         }
     }
 }

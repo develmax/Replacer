@@ -39,7 +39,7 @@ namespace ReplaceLogic.V1
             var firstBuf = buf.Slice(0, part2Len);
             //var updateBuf = buf.Slice(partLen, part2Len);
             var lastBuf = buf.Slice(part2Len, part2Len);
-
+            
             //var state = states.start;
             var index = 0;
             var lastUpdatedBlockNumber = 0;
