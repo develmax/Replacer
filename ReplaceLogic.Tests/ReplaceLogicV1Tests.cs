@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -58,10 +59,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual(string.Empty, result);
         }
@@ -80,10 +79,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual("b", result);
         }
@@ -102,10 +99,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual("x", result);
         }
@@ -124,10 +119,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual("a", result);
         }
@@ -146,10 +139,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual(new string('b', str.Length), result);
         }
@@ -168,10 +159,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual(new string('b', str.Length), result);
         }
@@ -190,10 +179,8 @@ namespace ReplaceLogic.Tests
 
             var max_len = 1;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual(new string('a', str.Length), result);
         }
@@ -212,12 +199,10 @@ namespace ReplaceLogic.Tests
 
             var max_len = 2;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
-            Assert.AreEqual(new string('a', str.Length/2), result);
+            Assert.AreEqual(new string('a', str.Length / 2), result);
         }
 
         [TestMethod]
@@ -249,12 +234,102 @@ namespace ReplaceLogic.Tests
 
             var max_len = 2;
 
-            var result = PrepareStreams(str, (data, target) =>
-            {
-                ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len);
-            });
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
 
             Assert.AreEqual("aabdfac", result);
+        }
+
+        [TestMethod]
+        public void ReplaceManySymbol_ReplaceWithNullRoot()
+        {
+            var str = "ab_cd_efz";
+
+            var tree = new TreeNode
+            {
+                text = null,
+                child = new TreeNode
+                {
+                    text = "ab_",
+                    len = 3,
+                    child = new TreeNode
+                    {
+                        text = "hj",
+                        repl = "repl1",
+                        len = 5,
+                        nextSibling = new TreeNode
+                        {
+                            text = "cd",
+                            repl = "repl2",
+                            len = 5
+                        }
+                    },
+                    nextSibling = new TreeNode
+                    {
+                        text = "_",
+                        repl = "repl3",
+                        len = 1,
+                        child = new TreeNode
+                        {
+                            text = "e",
+                            repl = "repl4",
+                            len = 2,
+                            nextSibling = new TreeNode
+                            {
+                                text = "x",
+                                repl = "repl5",
+                                len = 2
+                            }
+                        },
+                        nextSibling = new TreeNode
+                        {
+                            text = "f",
+                            repl = "repl6",
+                            len = 2
+                        }
+                    }
+                }
+            };
+
+            tree.child.parent = tree;
+            tree.child.child.parent = tree.child;
+            tree.child.child.nextSibling.parent = tree.child;
+            tree.child.nextSibling.parent = tree;
+            tree.child.nextSibling.child.parent = tree.child.nextSibling;
+            tree.child.nextSibling.child.nextSibling.parent = tree.child.nextSibling;
+
+            tree.child.nextSibling.nextSibling.parent = tree;
+
+            var max_len = 5;
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, max_len); });
+
+            Assert.AreEqual("repl2repl4repl6z", result);
+        }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test1()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "env.name", "test1" },
+                { "env.ver", "1.0" },
+                { "env.ver.name", "alfa" },
+                { "sys.dir.temp", "c:\\temp" },
+                { "sys.dir.win", "c:\\windows" },
+                { "net.protocol", "http" },
+                { "net.product", "sh" }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "net.protocol:net.product env.name env.ver (env.ver.name)";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, maxLen); });
+
+            Assert.AreEqual("http:sh test1 1.0 (alfa)", result);
         }
     }
 }

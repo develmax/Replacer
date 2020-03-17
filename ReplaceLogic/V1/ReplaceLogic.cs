@@ -16,9 +16,9 @@ namespace ReplaceLogic.V1
             }
         }
 
-        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int max_len)
+        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int maxLen)
         {
-            var partLen = max_len;
+            var partLen = maxLen < 1024 ? 1024 : maxLen;
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
             var partsLen = part2Len + part2Len;
@@ -28,7 +28,9 @@ namespace ReplaceLogic.V1
             var part3LastIndex = part3Len - 1;
             var partsLastIndex = partsLen - 1;
 
-            Span<char> buf = stackalloc char[partsLen];
+            Span<char> buf = partsLen > 1024
+                ? new char[partsLen]
+                : stackalloc char[partsLen];
 
             //var buf = new Span<char>(array);
 
@@ -36,10 +38,10 @@ namespace ReplaceLogic.V1
             //var updateBuf = buf.Slice(partLen, part2Len);
             var lastBuf = buf.Slice(part2Len, part2Len);
 
-            var state = states.start;
+            //var state = states.start;
             var index = 0;
             var lastUpdatedBlockNumber = 0;
-            var blockChecked = false;
+            //var blockChecked = false;
             var checkNodeTextLen = 0;
             var charChecking = false;
             var charCheckingIndex = -1;
@@ -60,17 +62,19 @@ namespace ReplaceLogic.V1
 
             TreeNode node = tree;
 
+            var state = states.read_first;
             switch (state)
             {
-                case states.start:
+                /*case states.start:
                     {
                         goto case states.read_first;
-                    }
+                    }*/
                 case states.read_first:
                     {
                         readLen = s.ReadBlock(firstBuf);
                         if (readLen == 0)
-                            goto case states.end;
+                            //goto case states.end;
+                            break;
 
                         if (readLen < part2Len)
                         {
@@ -85,16 +89,19 @@ namespace ReplaceLogic.V1
 
                         goto case states.fast_check_node;
                     }
-                case states.move_index:
+                case states.next_char:
                     {
                         if (lastRead)
                         {
                             if (index == lastIndex)
-                                goto case states.end;
+                                //goto case states.end;
+                                break;
                         }
-                        else if (!blockChecked)
-                            goto case states.check_block;
-
+                        
+                        goto case states.check_block;
+                    }
+                case states.move_index:
+                    {
                         if (index == partsLastIndex)
                             index = 0;
                         else
@@ -103,7 +110,7 @@ namespace ReplaceLogic.V1
                         //if (node == null)
                         //    node = tree;
 
-                        blockChecked = false;
+                        //blockChecked = false;
 
                         if (charChecking)
                         {
@@ -122,6 +129,8 @@ namespace ReplaceLogic.V1
                                             {
 
                                             }*/
+                        if (node.text == null)
+                            node = node.child;
 
                         if (buf[index] != node.text[0])
                             goto case states.next_node;
@@ -151,8 +160,16 @@ namespace ReplaceLogic.V1
                             }
                             else
                             {
-                                if (index + nodeTextLastIndex > lastIndex)
-                                    goto case states.next_node;
+                                if (lastUpdatedBlockNumber == 1)
+                                {
+                                    if (nodeTextLastIndex - lostLen > lastIndex)
+                                        goto case states.next_node;
+                                }
+                                else
+                                {
+                                    if (index + nodeTextLastIndex > lastIndex)
+                                        goto case states.next_node;
+                                }
 
                                 if (buf[index + nodeTextLastIndex] != node.text[nodeTextLastIndex])
                                     goto case states.next_node;
@@ -186,14 +203,14 @@ namespace ReplaceLogic.V1
                         checkNodeTextLen = nodeTextLastIndex;
                         charChecking = true;
 
-                        goto case states.move_index;
+                        goto case states.next_char;
                     }
                 case states.check_node:
                     {
                         if (node.child != null)
                         {
                             node = node.child;
-                            goto case states.move_index;
+                            goto case states.next_char;
                         }
                         else if (node.repl != null)
                         {
@@ -257,7 +274,7 @@ namespace ReplaceLogic.V1
                             goto case states.fast_check_node;
                         }
 
-                        goto case states.move_index;
+                        goto case states.next_char;
                     }
                 case states.next_node:
                     {
@@ -281,9 +298,12 @@ namespace ReplaceLogic.V1
                                 goto case states.write_node;
                             }
 
-                            index = index - node.parent.text.Length;
-                            if (index < 0)
-                                index = index + partsLen;
+                            if (node.parent.text != null)
+                            {
+                                index = index - node.parent.text.Length;
+                                if (index < 0)
+                                    index = index + partsLen;
+                            }
 
                             node = node.parent;
                             goto case states.next_node;
@@ -291,7 +311,7 @@ namespace ReplaceLogic.V1
                         else
                         {
                             node = tree;
-                            goto case states.move_index;
+                            goto case states.next_char;
                         }
                     }
                 case states.check_char:
@@ -307,7 +327,7 @@ namespace ReplaceLogic.V1
                             checkNodeTextLen--;
                             charCheckingIndex++;
 
-                            goto case states.move_index;
+                            goto case states.next_char;
                         }
                     }
                 case states.check_block:
@@ -373,21 +393,31 @@ namespace ReplaceLogic.V1
                             }
                         }
 
-                        blockChecked = true;
+                        //blockChecked = true;
                         goto case states.move_index;
                     }
-                case states.end:
-                    {
-                        if (writeLastIndex > lastIndex)
+                    /*case states.end:
                         {
-                            d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
-                            d.Write(buf.Slice(0, lastIndex + 1));
-                        }
-                        else if (writeLastIndex < lastIndex)
-                            d.Write(buf.Slice(writeLastIndex + 1, lastIndex - writeLastIndex));
+                            if (writeLastIndex > lastIndex)
+                            {
+                                d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
+                                d.Write(buf.Slice(0, lastIndex + 1));
+                            }
+                            else if (writeLastIndex < lastIndex)
+                                d.Write(buf.Slice(writeLastIndex + 1, lastIndex - writeLastIndex));
 
-                        break;
-                    }
+                            break;
+                        }*/
+            }
+
+            {
+                if (writeLastIndex > lastIndex)
+                {
+                    d.Write(buf.Slice(writeLastIndex + 1, partsLastIndex - writeLastIndex));
+                    d.Write(buf.Slice(0, lastIndex + 1));
+                }
+                else if (writeLastIndex < lastIndex)
+                    d.Write(buf.Slice(writeLastIndex + 1, lastIndex - writeLastIndex));
             }
         }
     }
