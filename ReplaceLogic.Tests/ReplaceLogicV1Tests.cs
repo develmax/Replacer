@@ -331,5 +331,103 @@ namespace ReplaceLogic.Tests
 
             Assert.AreEqual("http:sh test1 1.0 (alfa)", result);
         }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test2()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "IKLM", "MLKI" },
+                { "NO", "ON" },
+                { "RS", "SR" },
+                { "Z", "A" },
+                { "A", "Z" }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "ABCDEFGHIKLMNOPQRSTVXYZ";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, 10, true); });
+
+            Assert.AreEqual("ZBCDEFGHMLKIONPQSRTVXYA", result);
+        }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test4()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "A", "A" },
+                { "B", "B" },
+                { "C", "S" },
+                { "S", "C" },
+                { "Z", "ZZ" }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "ABCDEFGHIKLMNOPQRSTVXYZ";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, 10, true); });
+
+            Assert.AreEqual("ABSDEFGHIKLMNOPQRCTVXYZZ", result);
+        }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test5()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "A", "A" }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "A";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, maxLen); });
+
+            Assert.AreEqual("A", result);
+        }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test6()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "A", string.Empty }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "A";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, maxLen); });
+
+            Assert.AreEqual(string.Empty, result);
+        }
+
+        [TestMethod]
+        public void DictionaryToTreeConverter_Test7()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { string.Empty, "X" }
+            };
+
+            var tree = DictionaryToTreeConverter.Convert(dic, out var maxLen);
+
+            var str = "A";
+
+            var result = PrepareStreams(str,
+                (data, target) => { ReplaceLogic.V1.ReplaceLogic.ReplaceFile(data, target, tree, maxLen); });
+
+            Assert.AreEqual(string.Empty, result);
+        }
     }
 }

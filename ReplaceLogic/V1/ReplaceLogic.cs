@@ -16,9 +16,11 @@ namespace ReplaceLogic.V1
             }
         }
 
-        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int maxLen)
+        public static unsafe void ReplaceFile(StreamReader s, StreamWriter d, TreeNode tree, int maxLen, bool isCustomMaxLen = false)
         {
-            var partLen = maxLen < 1024 ? 1024 : maxLen;
+            var partLen =
+                isCustomMaxLen ? maxLen :
+                (maxLen < 1024 ? 1024 : maxLen);
             var part2Len = partLen + partLen;
             var part3Len = part2Len + partLen;
             var partsLen = part2Len + part2Len;
